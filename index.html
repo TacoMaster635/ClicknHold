@@ -6,104 +6,121 @@
 <title>Hold On!</title>
 
 <style>
-* {
-    box-sizing: border-box;
+*{
+    box-sizing:border-box;
 }
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-    color: white;
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-    user-select: none;
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    color:white;
+    display:flex;
+    height:100vh;
+    overflow:hidden;
+    user-select:none;
 }
 
-.game {
-    flex: 3;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
+.game{
+    flex:3;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
 }
 
-.shop {
-    flex: 1;
-    background: rgba(255,255,255,0.08);
-    border-left: 2px solid rgba(255,255,255,0.12);
-    padding: 20px;
-    overflow-y: auto;
-    z-index: 10;
+.shop{
+    flex:1;
+    background:rgba(255,255,255,.08);
+    padding:20px;
+    border-left:2px solid rgba(255,255,255,.1);
+    overflow-y:auto;
 }
 
-h1 {
-    font-size: 3rem;
+#score{
+    font-size:5rem;
+    color:gold;
+    font-weight:bold;
 }
 
-#score {
-    font-size: 5rem;
-    color: gold;
-    font-weight: bold;
+.stat{
+    margin:10px 0;
 }
 
-.subtitle {
-    opacity: 0.7;
-    margin-top: 10px;
+.shop button{
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    border:none;
+    border-radius:10px;
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+    font-size:1rem;
 }
 
-.shop button {
-    width: 100%;
-    margin: 8px 0;
-    padding: 15px;
-    border: none;
-    border-radius: 10px;
-    background: #2563eb;
-    color: white;
-    font-size: 1rem;
-    cursor: pointer;
+.shop button:hover{
+    background:#1d4ed8;
 }
 
-.shop button:hover {
-    background: #1d4ed8;
+.star{
+    position:fixed;
+    pointer-events:none;
+    animation:floatUp 1s forwards linear;
 }
 
-.stat {
-    margin-top: 10px;
-}
-
-.star {
-    position: fixed;
-    pointer-events: none;
-    animation: floatAway 1s linear forwards;
-}
-
-@keyframes floatAway {
-    from {
-        opacity: 1;
-        transform: translateY(0px);
+@keyframes floatUp{
+    from{
+        opacity:1;
+        transform:translateY(0);
     }
-
-    to {
-        opacity: 0;
-        transform: translateY(-40px);
+    to{
+        opacity:0;
+        transform:translateY(-50px);
     }
+}
+
+.meter{
+    width:300px;
+    height:25px;
+    background:#222;
+    border-radius:999px;
+    margin-top:15px;
+    overflow:hidden;
+}
+
+.fill{
+    height:100%;
+    width:0%;
+    background:limegreen;
 }
 </style>
 </head>
-
 <body>
 
 <div class="game">
+
     <h1>⭐ Hold On! ⭐</h1>
 
     <div id="score">0</div>
 
-    <div class="subtitle">
-        Hold anywhere to earn stars!
+    <div class="stat">
+        Combo: x<span id="combo">1.00</span>
     </div>
+
+    <div class="stat">
+        Hold anywhere on the screen!
+    </div>
+
+    <div class="meter">
+        <div class="fill" id="perfectMeter"></div>
+    </div>
+
+    <div>
+        Perfect Hold:
+        <span id="perfectPercent">0%</span>
+    </div>
+
 </div>
 
 <div class="shop">
@@ -150,131 +167,254 @@ let powerCost = 10;
 let multCost = 100;
 let autoCost = 250;
 
+let combo = 1;
 let holding = null;
 
-function createStar() {
+let perfectHold = 0;
+let perfectBoost = false;
 
-    const star = document.createElement("div");
+/* LOAD */
 
-    star.className = "star";
-    star.textContent = "⭐";
+function loadGame(){
 
-    star.style.left =
-        Math.random() * window.innerWidth + "px";
+    const save =
+    JSON.parse(localStorage.getItem("holdOnSave"));
 
-    star.style.top =
-        Math.random() * window.innerHeight + "px";
+    if(!save) return;
 
-    star.style.fontSize =
-        (15 + Math.random() * 25) + "px";
+    score = save.score || 0;
+    holdPower = save.holdPower || 1;
+    autoHolders = save.autoHolders || 0;
+
+    powerCost = save.powerCost || 10;
+    multCost = save.multCost || 100;
+    autoCost = save.autoCost || 250;
+}
+
+/* SAVE */
+
+function saveGame(){
+
+    localStorage.setItem(
+        "holdOnSave",
+        JSON.stringify({
+            score,
+            holdPower,
+            autoHolders,
+            powerCost,
+            multCost,
+            autoCost
+        })
+    );
+}
+
+setInterval(saveGame,5000);
+
+/* STARS */
+
+function createStar(){
+
+    const star=document.createElement("div");
+
+    star.className="star";
+    star.textContent="⭐";
+
+    star.style.left=
+    Math.random()*window.innerWidth+"px";
+
+    star.style.top=
+    Math.random()*window.innerHeight+"px";
+
+    star.style.fontSize=
+    (16+Math.random()*20)+"px";
 
     document.body.appendChild(star);
 
-    setTimeout(() => {
+    setTimeout(()=>{
         star.remove();
-    }, 1000);
+    },1000);
 }
 
-function startHolding() {
+/* HOLDING */
 
-    if (holding) return;
+function startHolding(){
 
-    holding = setInterval(() => {
+    if(holding) return;
 
-        score += holdPower;
+    holding=setInterval(()=>{
+
+        let gain=
+        holdPower*combo;
+
+        if(perfectBoost){
+            gain*=5;
+        }
+
+        score+=gain;
+
+        combo+=0.02;
+
+        perfectHold+=0.5;
+
+        if(perfectHold>=100){
+
+            perfectHold=0;
+            perfectBoost=true;
+
+            setTimeout(()=>{
+                perfectBoost=false;
+            },10000);
+
+        }
 
         createStar();
 
         updateDisplay();
 
-    }, 100);
+    },100);
+
 }
 
-function stopHolding() {
+function stopHolding(){
 
     clearInterval(holding);
 
-    holding = null;
+    holding=null;
+
+    combo=1;
+
+    updateDisplay();
 }
 
-document.addEventListener("mousedown", startHolding);
-document.addEventListener("mouseup", stopHolding);
-document.addEventListener("mouseleave", stopHolding);
+/* EVENTS */
 
-document.addEventListener("touchstart", startHolding);
-document.addEventListener("touchend", stopHolding);
+document.addEventListener(
+    "mousedown",
+    startHolding
+);
 
-function buyPower() {
+document.addEventListener(
+    "mouseup",
+    stopHolding
+);
 
-    if (score >= powerCost) {
+document.addEventListener(
+    "mouseleave",
+    stopHolding
+);
 
-        score -= powerCost;
+document.addEventListener(
+    "touchstart",
+    startHolding
+);
+
+document.addEventListener(
+    "touchend",
+    stopHolding
+);
+
+/* SHOP */
+
+function buyPower(){
+
+    if(score>=powerCost){
+
+        score-=powerCost;
 
         holdPower++;
 
-        powerCost = Math.floor(powerCost * 1.5);
+        powerCost=
+        Math.floor(powerCost*1.5);
 
         updateDisplay();
     }
 }
 
-function buyMultiplier() {
+function buyMultiplier(){
 
-    if (score >= multCost) {
+    if(score>=multCost){
 
-        score -= multCost;
+        score-=multCost;
 
-        holdPower *= 2;
+        holdPower*=2;
 
-        multCost = Math.floor(multCost * 3);
+        multCost=
+        Math.floor(multCost*3);
 
         updateDisplay();
     }
 }
 
-function buyAuto() {
+function buyAuto(){
 
-    if (score >= autoCost) {
+    if(score>=autoCost){
 
-        score -= autoCost;
+        score-=autoCost;
 
         autoHolders++;
 
-        autoCost = Math.floor(autoCost * 2);
+        autoCost=
+        Math.floor(autoCost*2);
 
         updateDisplay();
     }
 }
 
-setInterval(() => {
+/* AUTO HOLDERS */
 
-    score += autoHolders * holdPower;
+setInterval(()=>{
+
+    score+=autoHolders*holdPower;
 
     updateDisplay();
 
-}, 1000);
+},1000);
 
-function updateDisplay() {
+/* DISPLAY */
 
-    document.getElementById("score").textContent =
-        Math.floor(score);
+function updateDisplay(){
 
-    document.getElementById("holdPower").textContent =
-        holdPower;
+    document.getElementById("score")
+    .textContent=
+    Math.floor(score);
 
-    document.getElementById("autoHolders").textContent =
-        autoHolders;
+    document.getElementById("combo")
+    .textContent=
+    combo.toFixed(2);
 
-    document.getElementById("powerCost").textContent =
-        powerCost;
+    document.getElementById("holdPower")
+    .textContent=
+    holdPower;
 
-    document.getElementById("multCost").textContent =
-        multCost;
+    document.getElementById("autoHolders")
+    .textContent=
+    autoHolders;
 
-    document.getElementById("autoCost").textContent =
-        autoCost;
+    document.getElementById("powerCost")
+    .textContent=
+    powerCost;
+
+    document.getElementById("multCost")
+    .textContent=
+    multCost;
+
+    document.getElementById("autoCost")
+    .textContent=
+    autoCost;
+
+    document.getElementById("perfectPercent")
+    .textContent=
+    Math.floor(perfectHold)+"%";
+
+    document.getElementById("perfectMeter")
+    .style.width=
+    perfectHold+"%";
+
 }
 
+/* START */
+
+loadGame();
 updateDisplay();
 
 </script>
