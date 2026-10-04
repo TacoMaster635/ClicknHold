@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -85,7 +85,6 @@ body{
         opacity:1;
         transform:translateY(0);
     }
-
     to{
         opacity:0;
         transform:translateY(-50px);
@@ -93,7 +92,6 @@ body{
 }
 </style>
 </head>
-
 <body>
 
 <div class="game">
@@ -102,12 +100,9 @@ body{
 
     <div id="score">0</div>
 
-    <h2>
-        Combo:
-        <span id="combo">1.00</span>x
-    </h2>
+    <h2>Combo: <span id="combo">1.00</span>x</h2>
 
-    <p>Hold anywhere on screen!</p>
+    <p>Hold anywhere on the screen!</p>
 
     <div class="meter">
         <div class="fill" id="perfectMeter"></div>
@@ -119,7 +114,7 @@ body{
     </p>
 
     <h3 id="boostStatus">
-        In Progress
+        Charging...
     </h3>
 
 </div>
@@ -170,7 +165,6 @@ body{
 <script>
 
 let score = 0;
-
 let holdPower = 1;
 let autoHolders = 0;
 
@@ -185,12 +179,21 @@ let perfectBoost = false;
 
 let holding = null;
 
+function formatNumber(num){
+
+    if(num >= 1e15) return (num/1e15).toFixed(2)+"Q";
+    if(num >= 1e12) return (num/1e12).toFixed(2)+"T";
+    if(num >= 1e9) return (num/1e9).toFixed(2)+"B";
+    if(num >= 1e6) return (num/1e6).toFixed(2)+"M";
+    if(num >= 1e3) return (num/1e3).toFixed(2)+"K";
+
+    return Math.floor(num);
+}
+
 function loadGame(){
 
     const save =
-        JSON.parse(
-            localStorage.getItem("holdOnSave")
-        );
+    JSON.parse(localStorage.getItem("holdOnSave"));
 
     if(!save) return;
 
@@ -239,24 +242,23 @@ function deleteSave(){
 
 function createStar(){
 
-    const star =
-        document.createElement("div");
+    const star=document.createElement("div");
 
-    star.className = "star";
-    star.textContent = "⭐";
+    star.className="star";
+    star.textContent="⭐";
 
-    star.style.left =
-        Math.random() * window.innerWidth + "px";
+    star.style.left=
+    Math.random()*window.innerWidth+"px";
 
-    star.style.top =
-        Math.random() * window.innerHeight + "px";
+    star.style.top=
+    Math.random()*window.innerHeight+"px";
 
-    star.style.fontSize =
-        (15 + Math.random() * 20) + "px";
+    star.style.fontSize=
+    (15+Math.random()*20)+"px";
 
     document.body.appendChild(star);
 
-    setTimeout(() => {
+    setTimeout(()=>{
         star.remove();
     },1000);
 }
@@ -265,43 +267,43 @@ function startHolding(){
 
     if(holding) return;
 
-    holding = setInterval(() => {
+    holding=setInterval(()=>{
 
-        let gain =
-            holdPower * combo;
+        let gain=
+        holdPower*combo;
 
         if(perfectBoost){
-            gain *= 25;
+            gain*=25;
         }
 
-        score += gain;
+        score+=gain;
 
-        combo =
-            Math.min(5,
-                combo + 0.02
-            );
+        combo=Math.min(
+            5,
+            combo+0.02
+        );
 
-        perfectHold += 0.5;
+        perfectHold+=0.5;
 
-        if(perfectHold >= 100){
+        if(perfectHold>=100){
 
-            perfectHold = 0;
+            perfectHold=0;
 
-            perfectBoost = true;
+            perfectBoost=true;
 
             document
             .getElementById("boostStatus")
-            .textContent =
+            .textContent=
             "🔥 PERFECT HOLD ACTIVE!";
 
-            setTimeout(() => {
+            setTimeout(()=>{
 
-                perfectBoost = false;
+                perfectBoost=false;
 
                 document
                 .getElementById("boostStatus")
-                .textContent =
-                "Ready";
+                .textContent=
+                "Charging...";
 
             },10000);
         }
@@ -317,9 +319,9 @@ function stopHolding(){
 
     clearInterval(holding);
 
-    holding = null;
+    holding=null;
 
-    combo = 1;
+    combo=1;
 
     updateDisplay();
 }
@@ -351,14 +353,14 @@ document.addEventListener(
 
 function buyPower(){
 
-    if(score >= powerCost){
+    if(score>=powerCost){
 
-        score -= powerCost;
+        score-=powerCost;
 
         holdPower++;
 
-        powerCost =
-            Math.floor(powerCost * 1.5);
+        powerCost=
+        Math.floor(powerCost*1.5);
 
         updateDisplay();
     }
@@ -366,14 +368,14 @@ function buyPower(){
 
 function buyMultiplier(){
 
-    if(score >= multCost){
+    if(score>=multCost){
 
-        score -= multCost;
+        score-=multCost;
 
-        holdPower *= 2;
+        holdPower*=2;
 
-        multCost =
-            Math.floor(multCost * 3);
+        multCost=
+        Math.floor(multCost*3);
 
         updateDisplay();
     }
@@ -381,23 +383,23 @@ function buyMultiplier(){
 
 function buyAuto(){
 
-    if(score >= autoCost){
+    if(score>=autoCost){
 
-        score -= autoCost;
+        score-=autoCost;
 
         autoHolders++;
 
-        autoCost =
-            Math.floor(autoCost * 2);
+        autoCost=
+        Math.floor(autoCost*2);
 
         updateDisplay();
     }
 }
 
-setInterval(() => {
+setInterval(()=>{
 
-    score +=
-        autoHolders * holdPower;
+    score+=
+    autoHolders*holdPower;
 
     updateDisplay();
 
@@ -407,65 +409,53 @@ setInterval(saveGame,5000);
 
 function updateDisplay(){
 
-    document
-    .getElementById("score")
-    .textContent =
-    Math.floor(score);
+    document.getElementById("score")
+    .textContent=
+    formatNumber(score);
 
-    const comboElement =
-        document
-        .getElementById("combo");
+    const comboElement=
+    document.getElementById("combo");
 
-    comboElement.textContent =
-        combo.toFixed(2);
+    comboElement.textContent=
+    combo.toFixed(2);
 
-    if(combo >= 5){
-        comboElement.style.color =
-        "gold";
+    if(combo>=5){
+        comboElement.style.color="gold";
     }
-    else if(combo >= 3){
-        comboElement.style.color =
-        "orange";
+    else if(combo>=3){
+        comboElement.style.color="orange";
     }
     else{
-        comboElement.style.color =
-        "white";
+        comboElement.style.color="white";
     }
 
-    document
-    .getElementById("perfectPercent")
-    .textContent =
-    Math.floor(perfectHold) + "%";
+    document.getElementById("perfectPercent")
+    .textContent=
+    Math.floor(perfectHold)+"%";
 
-    document
-    .getElementById("perfectMeter")
-    .style.width =
-    perfectHold + "%";
+    document.getElementById("perfectMeter")
+    .style.width=
+    perfectHold+"%";
 
-    document
-    .getElementById("holdPower")
-    .textContent =
-    holdPower;
+    document.getElementById("holdPower")
+    .textContent=
+    formatNumber(holdPower);
 
-    document
-    .getElementById("autoHolders")
-    .textContent =
-    autoHolders;
+    document.getElementById("autoHolders")
+    .textContent=
+    formatNumber(autoHolders);
 
-    document
-    .getElementById("powerCost")
-    .textContent =
-    powerCost;
+    document.getElementById("powerCost")
+    .textContent=
+    formatNumber(powerCost);
 
-    document
-    .getElementById("multCost")
-    .textContent =
-    multCost;
+    document.getElementById("multCost")
+    .textContent=
+    formatNumber(multCost);
 
-    document
-    .getElementById("autoCost")
-    .textContent =
-    autoCost;
+    document.getElementById("autoCost")
+    .textContent=
+    formatNumber(autoCost);
 }
 
 loadGame();
