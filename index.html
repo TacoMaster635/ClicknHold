@@ -4,56 +4,61 @@
     <title>Clicker Game</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             text-align: center;
-            margin-top: 100px;
-        }
-
-        #score {
-            font-size: 48px;
-            margin: 20px;
+            font-family: Arial, sans-serif;
         }
 
         button {
-            font-size: 24px;
-            padding: 15px 30px;
-            cursor: pointer;
+            padding: 10px 20px;
+            font-size: 20px;
+            margin: 5px;
         }
     </style>
 </head>
 <body>
+
     <h1>Clicker Game</h1>
 
-    <div id="score">0</div>
+    <h2>Score: <span id="score">0</span></h2>
 
-    <button onclick="clickGame()">
-        Click Me!
-    </button>
+    <button onclick="clickGame()">Click Me!</button>
 
-<script>
-    let score = 0;
-    let clickPower = 1;
-    let upgradeCost = 10;
+    <hr>
 
-    function clickGame() {
-        score += clickPower;
-        updateDisplay();
-    }
+    <h2>Shop</h2>
 
-    function buyUpgrade() {
-        if (score >= upgradeCost) {
-            score -= upgradeCost;
-            clickPower++;
-            upgradeCost = Math.floor(upgradeCost * 1.5);
+    <p>Click Power: <span id="power">1</span></p>
+    <p>Upgrade Cost: <span id="cost">10</span></p>
+
+    <button onclick="buyUpgrade()">Buy +1 Click Power</button>
+
+    <script>
+        let score = 0;
+        let clickPower = 1;
+        let upgradeCost = 10;
+
+        function clickGame() {
+            score += clickPower;
             updateDisplay();
         }
-    }
 
-    function updateDisplay() {
-        document.getElementById("score").textContent = score;
-        document.getElementById("power").textContent = clickPower;
-        document.getElementById("cost").textContent = upgradeCost;
-    }
-</script>
+        function buyUpgrade() {
+            if (score >= upgradeCost) {
+                score -= upgradeCost;
+                clickPower++;
+                upgradeCost = Math.floor(upgradeCost * 1.5);
+                updateDisplay();
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById("score").textContent = score;
+            document.getElementById("power").textContent = clickPower;
+            document.getElementById("cost").textContent = upgradeCost;
+        }
+
+        updateDisplay();
+    </script>
+
 </body>
 </html>
