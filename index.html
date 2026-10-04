@@ -30,13 +30,30 @@
         Click Me!
     </button>
 
-    <script>
-        let score = 0;
+<script>
+    let score = 0;
+    let clickPower = 1;
+    let upgradeCost = 10;
 
-        function clickGame() {
-            score++;
-            document.getElementById("score").textContent = score;
+    function clickGame() {
+        score += clickPower;
+        updateDisplay();
+    }
+
+    function buyUpgrade() {
+        if (score >= upgradeCost) {
+            score -= upgradeCost;
+            clickPower++;
+            upgradeCost = Math.floor(upgradeCost * 1.5);
+            updateDisplay();
         }
-    </script>
+    }
+
+    function updateDisplay() {
+        document.getElementById("score").textContent = score;
+        document.getElementById("power").textContent = clickPower;
+        document.getElementById("cost").textContent = upgradeCost;
+    }
+</script>
 </body>
 </html>
