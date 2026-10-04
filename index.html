@@ -1,139 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Hold On!</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hold On!</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<style>
+* {
+    box-sizing: border-box;
+}
 
-        body {
-            margin: 0;
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: white;
-            font-family: Arial, sans-serif;
-            display: flex;
-            height: 100vh;
-        }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+}
 
-        .game {
-            flex: 3;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
+.game {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
 
-        .shop {
-            flex: 1;
-            background: rgba(255,255,255,0.08);
-            padding: 20px;
-            border-left: 2px solid rgba(255,255,255,0.15);
-            overflow-y: auto;
-        }
+.shop {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border-left: 2px solid rgba(255,255,255,0.12);
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 10;
+}
 
-        h1 {
-            margin-bottom: 10px;
-            font-size: 3rem;
-        }
+h1 {
+    font-size: 3rem;
+}
 
-        #score {
-            font-size: 4rem;
-            font-weight: bold;
-            color: #4ade80;
-            margin-bottom: 40px;
-        }
+#score {
+    font-size: 5rem;
+    color: gold;
+    font-weight: bold;
+}
 
-        #holdButton {
-            width: 250px;
-            height: 250px;
-            border-radius: 50%;
-            border: none;
-            background: #facc15;
-            color: #111827;
-            font-size: 2rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 0 30px rgba(250, 204, 21, 0.4);
-            transition: transform 0.1s;
-        }
+.subtitle {
+    opacity: 0.7;
+    margin-top: 10px;
+}
 
-        #holdButton:active {
-            transform: scale(0.95);
-        }
+.shop button {
+    width: 100%;
+    margin: 8px 0;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+}
 
-        .shop button {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 10px;
-            background: #2563eb;
-            color: white;
-            cursor: pointer;
-            font-size: 1rem;
-        }
+.shop button:hover {
+    background: #1d4ed8;
+}
 
-        .shop button:hover {
-            background: #1d4ed8;
-        }
+.stat {
+    margin-top: 10px;
+}
 
-        .stat {
-            margin: 10px 0;
-        }
+.star {
+    position: fixed;
+    pointer-events: none;
+    animation: floatAway 1s linear forwards;
+}
 
-        hr {
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-    </style>
+@keyframes floatAway {
+    from {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-40px);
+    }
+}
+</style>
 </head>
+
 <body>
 
 <div class="game">
-    <h1>🖐️ Hold On!</h1>
+    <h1>⭐ Hold On! ⭐</h1>
 
     <div id="score">0</div>
 
-    <button
-        id="holdButton"
-        onmousedown="startHolding()"
-        onmouseup="stopHolding()"
-        onmouseleave="stopHolding()"
-        ontouchstart="startHolding()"
-        ontouchend="stopHolding()">
-        HOLD
-    </button>
+    <div class="subtitle">
+        Hold anywhere to earn stars!
+    </div>
 </div>
 
 <div class="shop">
+
     <h2>🏪 Shop</h2>
 
     <button onclick="buyPower()">
-        +1 Hold Power (Cost: <span id="powerCost">10</span>)
+        +1 Hold Power
+        (<span id="powerCost">10</span>)
     </button>
 
     <button onclick="buyMultiplier()">
-        x2 Hold Power (Cost: <span id="multCost">100</span>)
+        x2 Power
+        (<span id="multCost">100</span>)
     </button>
 
     <button onclick="buyAuto()">
-        Auto Hold (Cost: <span id="autoCost">250</span>)
+        Auto Holder
+        (<span id="autoCost">250</span>)
     </button>
 
     <hr>
 
     <div class="stat">
-        Hold Power: <span id="holdPower">1</span>
+        Hold Power:
+        <span id="holdPower">1</span>
     </div>
 
     <div class="stat">
-        Auto Holders: <span id="autoHolders">0</span>
+        Auto Holders:
+        <span id="autoHolders">0</span>
     </div>
+
 </div>
 
 <script>
+
 let score = 0;
 
 let holdPower = 1;
@@ -145,64 +152,131 @@ let autoCost = 250;
 
 let holding = null;
 
+function createStar() {
+
+    const star = document.createElement("div");
+
+    star.className = "star";
+    star.textContent = "⭐";
+
+    star.style.left =
+        Math.random() * window.innerWidth + "px";
+
+    star.style.top =
+        Math.random() * window.innerHeight + "px";
+
+    star.style.fontSize =
+        (15 + Math.random() * 25) + "px";
+
+    document.body.appendChild(star);
+
+    setTimeout(() => {
+        star.remove();
+    }, 1000);
+}
+
 function startHolding() {
+
     if (holding) return;
 
     holding = setInterval(() => {
+
         score += holdPower;
+
+        createStar();
+
         updateDisplay();
+
     }, 100);
 }
 
 function stopHolding() {
+
     clearInterval(holding);
+
     holding = null;
 }
 
+document.addEventListener("mousedown", startHolding);
+document.addEventListener("mouseup", stopHolding);
+document.addEventListener("mouseleave", stopHolding);
+
+document.addEventListener("touchstart", startHolding);
+document.addEventListener("touchend", stopHolding);
+
 function buyPower() {
+
     if (score >= powerCost) {
+
         score -= powerCost;
-        holdPower += 1;
+
+        holdPower++;
+
         powerCost = Math.floor(powerCost * 1.5);
+
         updateDisplay();
     }
 }
 
 function buyMultiplier() {
+
     if (score >= multCost) {
+
         score -= multCost;
+
         holdPower *= 2;
+
         multCost = Math.floor(multCost * 3);
+
         updateDisplay();
     }
 }
 
 function buyAuto() {
+
     if (score >= autoCost) {
+
         score -= autoCost;
+
         autoHolders++;
+
         autoCost = Math.floor(autoCost * 2);
+
         updateDisplay();
     }
 }
 
 setInterval(() => {
+
     score += autoHolders * holdPower;
+
     updateDisplay();
+
 }, 1000);
 
 function updateDisplay() {
-    document.getElementById("score").textContent = Math.floor(score);
 
-    document.getElementById("holdPower").textContent = holdPower;
-    document.getElementById("autoHolders").textContent = autoHolders;
+    document.getElementById("score").textContent =
+        Math.floor(score);
 
-    document.getElementById("powerCost").textContent = powerCost;
-    document.getElementById("multCost").textContent = multCost;
-    document.getElementById("autoCost").textContent = autoCost;
+    document.getElementById("holdPower").textContent =
+        holdPower;
+
+    document.getElementById("autoHolders").textContent =
+        autoHolders;
+
+    document.getElementById("powerCost").textContent =
+        powerCost;
+
+    document.getElementById("multCost").textContent =
+        multCost;
+
+    document.getElementById("autoCost").textContent =
+        autoCost;
 }
 
 updateDisplay();
+
 </script>
 
 </body>
